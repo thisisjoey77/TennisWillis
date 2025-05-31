@@ -2,7 +2,7 @@
 //  ContentView.swift
 //  Tennis
 //
-//  Created by Kim Joy and Lim Juan
+//  Created by Kim Joy on 12/22/24.
 //
 
 import SwiftUI
@@ -32,22 +32,22 @@ enum BottomTab : String {
 
 var Teams: [String: [playerIcon]] = [
             "Varsity Team": [
-                playerIcon(id:0,title:"Marcus Ellison", imageUrl: "person"),
-                playerIcon(id:1,title:"Natalie Chen", imageUrl: "person"),
-                playerIcon(id:2,title:"Javier Morales", imageUrl: "person"),
-                playerIcon(id:3,title:"Priya Desai", imageUrl: "person"),
-                playerIcon(id:4,title:"Thomas Gallagher", imageUrl: "person"),
-                playerIcon(id:5,title:"Amina Yusuf", imageUrl: "person"),
-                playerIcon(id:6,title:"Caleb Montgomery", imageUrl: "person"),
+                playerIcon(id:0,title:"Joy Kim", imageUrl: "person"),
+                playerIcon(id:1,title:"Juan Lim", imageUrl: "person"),
+                playerIcon(id:2,title:"Victor Kim", imageUrl: "person"),
+                playerIcon(id:3,title:"John Park", imageUrl: "person"),
+                playerIcon(id:4,title:"Matthew Shim", imageUrl: "person"),
+                playerIcon(id:5,title:"Junho Son", imageUrl: "person"),
+                playerIcon(id:6,title:"James Kim", imageUrl: "person"),
             ],
             "JV Team": [
-                playerIcon(id:0,title:"Sofia Petrov", imageUrl: "person"),
-                playerIcon(id:1,title:"Liam ODonnel", imageUrl: "person"),
-                playerIcon(id:2,title:"Mei Tanaka", imageUrl: "person"),
-                playerIcon(id:3,title:"Lila Thornton", imageUrl: "person"),
-                playerIcon(id:4,title:"Omar Al-Farsi", imageUrl: "person"),
-                playerIcon(id:5,title:"Helena Duarte", imageUrl: "person"),
-                playerIcon(id:6,title:"James Kim", imageUrl: "person"),
+                playerIcon(id:0,title:"Ben Willis", imageUrl: "person"),
+                playerIcon(id:1,title:"Eva Biggart", imageUrl: "person"),
+                playerIcon(id:2,title:"Chris Reese", imageUrl: "person"),
+                playerIcon(id:3,title:"Lloyd Baker", imageUrl: "person"),
+                playerIcon(id:4,title:"Darrick Broudy", imageUrl: "person"),
+                playerIcon(id:5,title:"Julie Park", imageUrl: "person"),
+                playerIcon(id:6,title:"Michael Connor", imageUrl: "person"),
             ]
         ]
 
@@ -79,9 +79,9 @@ struct ContentView: View {
                     }
                     .navigationTitle(currentTab.rawValue.capitalized)
                     .navigationBarTitleDisplayMode(.large)
+                    .tint(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
                 }
             }
-            .background(Color(red:232/255,green:225/255,blue:207/255))
         }
     }
     
