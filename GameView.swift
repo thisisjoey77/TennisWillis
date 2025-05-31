@@ -40,12 +40,29 @@ struct GameView: View {
     @State var navigateToGame = false
     let rosterNames : [String] = Teams.map((\.key))
     
+    init() {
+         // Set background color of the selected segment
+         UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)
+         
+         // Set text color for selected segment
+         UISegmentedControl.appearance().setTitleTextAttributes(
+             [.foregroundColor: UIColor.white],
+             for: .selected
+         )
+         
+         // Set text color for unselected segments
+         UISegmentedControl.appearance().setTitleTextAttributes(
+             [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
+             for: .normal
+         )
+     }
+    
     var body: some View {
         VStack(alignment:.center) {
             NavigationView {
                 VStack(spacing: 30) {
                     Text("Match Setup")
-                        .font(.largeTitle)
+                        .font(.title)
                         .bold()
                         .padding(.top, 20)
                     
@@ -75,9 +92,11 @@ struct GameView: View {
                         Picker("Player 1", selection: $livePlayer1) {
                             ForEach(Teams[chosen] ?? [], id: \.id) { player in
                                 Text(player.title).tag(player.title)
+                                .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
+                        .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                     }
                     
                     // Player 2 Selection
@@ -89,9 +108,11 @@ struct GameView: View {
                             ForEach(Teams[chosen] ?? [], id: \.id) {
                                 player in
                                 Text(player.title).tag(player.title)
+                                .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
+                        .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                     }
                     
                     // Set Selection
@@ -117,7 +138,7 @@ struct GameView: View {
                         }
                         .frame(width: 200)
                         .padding()
-                        .background(Color.blue)
+                        .background(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .padding(.top, 30)
@@ -268,7 +289,7 @@ struct LiveView: View {
                                 Text("\(playerData[0].name)")
                                     .frame(width: 201, height: 500)
                             }
-                            .playerButtonStyle(color: .blue)
+                            .playerButtonStyle(color: Color(red: 30 / 255, green:154 / 255, blue: 205 / 255))
                             
                             
                             Button(action: {
@@ -278,7 +299,7 @@ struct LiveView: View {
                                 Text("\(playerData[1].name)")
                                     .frame(width: 201, height: 500)
                             }
-                            .playerButtonStyle(color: .orange)
+                            .playerButtonStyle(color: Color(red: 231 / 255, green:110 / 255, blue: 36 / 255))
                         }
                     }
                     .contentShape(Rectangle())
@@ -297,7 +318,7 @@ struct LiveView: View {
                                     playerStats: $playerData,
                                     winningplayer: $winningplayer,
                                     scoreAction: handleScore,
-                                    skipAction: skipScore,
+                                    skipAction: skipScore
                                 )
                             }
                             else {
@@ -473,7 +494,6 @@ struct GameAnalysisView: View {
                     // Buttons
                     HStack {
                         Button(action: {
-                        //    navigateToHome = true  // Trigger navigation
                             applyToPlayers(PStat: PStat1)
                             applyToPlayers(PStat: PStat2)
                             navigateToHome = true
@@ -577,7 +597,7 @@ struct ScoringButtons: View {
                                 .padding()
                                 .frame(minWidth: 203)
                                 .frame(minHeight: 225)
-                                .background(Color.green)
+                                .background(Color(red: 0.2, green: 0.7, blue: 0.2))
                                 .foregroundColor(.white)
                                 .cornerRadius(0)
                         }.overlay(
@@ -594,7 +614,7 @@ struct ScoringButtons: View {
                                 .padding()
                                 .frame(minWidth: 203)
                                 .frame(minHeight: 225)
-                                .background(Color.green)
+                                .background(Color(red: 0.2, green: 0.7, blue: 0.2))
                                 .foregroundColor(.white)
                                 .cornerRadius(0)
                         }.overlay(
@@ -614,7 +634,7 @@ struct ScoringButtons: View {
                                 .padding()
                                 .frame(minWidth: 203)
                                 .frame(minHeight: 150)
-                                .background(Color.red)
+                                .background(Color(red: 0.8, green: 0.2, blue: 0.2))
                                 .foregroundColor(.white)
                                 .cornerRadius(0)
                         }.overlay(
@@ -631,7 +651,7 @@ struct ScoringButtons: View {
                                 .padding()
                                 .frame(minWidth: 203)
                                 .frame(minHeight: 150)
-                                .background(Color.red)
+                                .background(Color(red: 0.8, green: 0.2, blue: 0.2))
                                 .foregroundColor(.white)
                                 .cornerRadius(0)
                         }.overlay(
@@ -648,7 +668,7 @@ struct ScoringButtons: View {
                                 .padding()
                                 .frame(minWidth: 203)
                                 .frame(minHeight: 150)
-                                .background(Color.red)
+                                .background(Color(red: 0.8, green: 0.2, blue: 0.2))
                                 .foregroundColor(.white)
                                 .cornerRadius(0)
                         } .overlay(
@@ -665,7 +685,7 @@ struct ScoringButtons: View {
                         .padding(.horizontal)
                         .frame(minWidth: 420)
                         .frame(minHeight:110)
-                        .background(Color.orange)
+                        .background(Color(red: 231 / 255, green:109 / 255, blue: 36 / 255))
                         .foregroundColor(.white)
                         .cornerRadius(0)
                 }
@@ -707,7 +727,7 @@ struct PlayerSelection: View {
                         Text("\(playerStats[0].name)")
                             .frame(width: 201, height: 400)
                     }
-                    .gameButtonStyle(color: .blue)
+                    .gameButtonStyle(color: Color(red: 30 / 255, green:154 / 255, blue: 205 / 255))
                     
                     Button(action: {
                         showScoringButtons = true
@@ -717,7 +737,7 @@ struct PlayerSelection: View {
                         Text("\(playerStats[1].name)")
                             .frame(width: 201, height: 400)
                     }
-                    .gameButtonStyle(color: .orange)
+                    .gameButtonStyle(color: Color(red: 231 / 255, green:110 / 255, blue: 36 / 255))
                 }
                 Button(action: {
                     playerStats[(currentServerIs1) ? 0 : 1].faults += 1
@@ -726,7 +746,7 @@ struct PlayerSelection: View {
                     Text("Fault")
                         .frame(width: 420, height: 100)
                 }
-                .faultButtonStyle(color: .red)
+                .faultButtonStyle(color: Color(red: 0.8, green: 0.2, blue: 0.2))
             }
             else {
                 HStack(spacing: 0) {
@@ -738,7 +758,7 @@ struct PlayerSelection: View {
                         Text("\(playerStats[0].name)")
                             .frame(width: 201, height: 500)
                     }
-                    .playerButtonStyle(color: .blue)
+                    .playerButtonStyle(color: Color(red: 30 / 255, green:154 / 255, blue: 205 / 255))
                     
                     Button(action: {
                         showScoringButtons = true
@@ -748,7 +768,7 @@ struct PlayerSelection: View {
                         Text("\(playerStats[1].name)")
                             .frame(width: 201, height: 500)
                     }
-                    .playerButtonStyle(color: .orange)
+                    .playerButtonStyle(color: Color(red: 231 / 255, green:110 / 255, blue: 36 / 255))
                 }
             }
         }
