@@ -14,28 +14,35 @@ struct RankView: View {
     @State private var matchRArr: [String: Double] = [:]
     @State private var gameArr: [String: Int] = [:]
     @State private var pointArr: [String: Int] = [:]
+    
+    init() {
+            UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)
+            
+            UISegmentedControl.appearance().setTitleTextAttributes(
+                [.foregroundColor: UIColor.white],
+                for: .selected
+            )
+            UISegmentedControl.appearance().setTitleTextAttributes(
+                [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
+                for: .normal
+            )
+        }
 
     var body: some View {
         VStack(spacing: 0) {
 
-            HStack(alignment: .top, spacing: 0) {
+            Picker("", selection: $referer) {
                 ForEach(teamOptions, id: \.self) { option in
-                    Button(action: {
-                        referer = option;
-                        renewSpecArray(referer: referer)
-                    }) {
-                        Text(option)
-                            .fontWeight(.semibold)
-                            .font(.caption)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(referer == option ? Color.blue.opacity(0.3) : Color.clear)
-                            .cornerRadius(12)
-                    }
+                    Text(option)
+                        .font(.caption)
+                        .fontWeight(.semibold)
                 }
             }
-            .padding(.bottom,10)
-
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.bottom, 10)
+            .onChange(of: referer) { newValue in
+                renewSpecArray(referer: newValue)
+            }
 
             HStack(alignment: .top) {
                 Text("Player")
@@ -53,6 +60,7 @@ struct RankView: View {
                             .font(.caption)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
+                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                             .background(selectedSort == sortOptions[index].replacingOccurrences(of: "\n", with: " ") ? Color.blue.opacity(0.3) : Color.clear)
                             .cornerRadius(12)
                     }
@@ -107,8 +115,12 @@ struct RankView: View {
                             print("Could not save PDF temporarily: \(error)")
                         }
                     }
-            }) {
+            })
+            {
                 Text("Export Data")
+                .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                .fontWeight(.semibold)
+                .padding(.vertical, 10)
             }
         }
         .position(x:200, y:250)
