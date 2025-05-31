@@ -88,22 +88,25 @@ struct RankView: View {
             }
             Button(action: {
                 let pdfDocument = PDFDocument()
-                let pdfPage = createPDFPage(from: Teams[referer] ?? [], ref: referer);
-                pdfDocument.insert(pdfPage, at: 0)
+                    let pdfPage = createPDFPage(from: Teams[referer] ?? [], ref: referer)
+                    pdfDocument.insert(pdfPage, at: 0)
 
-                if let documentData = pdfDocument.dataRepresentation() {
-                    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-                    let pdfURL = paths[0].appendingPathComponent("TennisStats.pdf")
-
-                    do {
-                        try documentData.write(to: pdfURL)
-                        print("PDF saved to: \(pdfURL)")
-                    } catch {
-                        print("Could not save PDF: \(error)")
+                    if let documentData = pdfDocument.dataRepresentation() {
+                        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("TennisStats.pdf")
+                        do {
+                            try documentData.write(to: tempURL)
+                            
+                            // Present Document Picker to export the file
+                            let picker = UIDocumentPickerViewController(forExporting: [tempURL])
+                            picker.shouldShowFileExtensions = true
+                            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                               let root = scene.windows.first?.rootViewController {
+                                root.present(picker, animated: true)
+                            }
+                        } catch {
+                            print("Could not save PDF temporarily: \(error)")
+                        }
                     }
-
-
-                }
             }) {
                 Text("Export Data")
             }
