@@ -9,34 +9,36 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        VStack(spacing: 10) {
-            NavigationStack {
-                HStack {
-                    Spacer()
-                    NavigationLink(
-                        destination: ModTeamView().navigationBarBackButtonHidden(true)) {
-                            Text("Edit")
-                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                        }
-                        .padding(.horizontal)
-                }
-                ForEach(Array(Teams.keys), id: \.self) { teamName in
-                    if Teams[teamName] != nil {
-                        VStack(alignment: .leading) {
-                            NavigationLink(
-                                destination: DetailGameView(referer: teamName).navigationBarBackButtonHidden(true)) {
-                                    Text(teamName)
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .padding(.horizontal)
-                                        .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    if let varsityArr = Teams[teamName] {
-                                        ForEach(varsityArr, id : \.id) { player in
-                                            PlayerView(player: player).padding(.horizontal, 10)
+        GeometryReader { geo in
+            VStack(spacing: 10) {
+                NavigationStack {
+                    HStack {
+                        Spacer()
+                        NavigationLink(
+                            destination: ModTeamView().navigationBarBackButtonHidden(true)) {
+                                Text("Edit")
+                                    .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                            }
+                            .padding(.horizontal)
+                    }
+                    ForEach(Array(Teams.keys), id: \.self) { teamName in
+                        if Teams[teamName] != nil {
+                            VStack(alignment: .leading) {
+                                NavigationLink(
+                                    destination: DetailGameView(referer: teamName).navigationBarBackButtonHidden(true)) {
+                                        Text(teamName)
+                                            .font(.title)
+                                            .fontWeight(.bold)
+                                            .padding(.horizontal)
+                                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack {
+                                        if let varsityArr = Teams[teamName] {
+                                            ForEach(varsityArr, id : \.id) { player in
+                                                PlayerView(player: player).padding(.horizontal, 10)
+                                            }
                                         }
                                     }
                                 }
@@ -44,10 +46,12 @@ struct HomeView: View {
                         }
                     }
                 }
-            }
-            
-        }.position(x:200, y:200)
-            .background(Color(red:232/255,green:225/255,blue:207/255))
+                
+            }.position(
+                x: geo.size.width / 2,
+                y: geo.size.height / 2
+            )
+        }
     }
 }
 
@@ -58,7 +62,7 @@ struct ModTeamView : View {
     
     var body: some View {
         if(finishedEditing) {
-            ContentView().navigationBarHidden(true)
+            ContentView().navigationBarBackButtonHidden(true)
         }
         else {
             
@@ -120,7 +124,8 @@ struct DetailGameView : View {
     
     var body: some View {
         if(finishedEditing) {
-            ContentView().navigationBarHidden(true)
+            ContentView().navigationBarBackButtonHidden(true)
+            
         }
         /*
         if(editNames) {
