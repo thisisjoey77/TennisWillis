@@ -2,8 +2,6 @@
 //  Selection.swift
 //  TennisApp
 //
-//  Created by Juan Lim on 1/6/25.
-//
 import SwiftUI
 
 
