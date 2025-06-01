@@ -53,6 +53,7 @@ struct GameView: View {
              [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
              for: .normal
          )
+        chosen = rosterNames[0]
      }
     
     var body: some View {
