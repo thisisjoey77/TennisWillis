@@ -2,8 +2,6 @@
 //  HomeView.swift
 //  Tennis
 //
-//  Created by Kim Joy on 12/23/24.
-//
 
 import SwiftUI
 
