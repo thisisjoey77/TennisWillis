@@ -2,8 +2,6 @@
 //  ContentView.swift
 //  Tennis
 //
-//  Created by Kim Joy on 12/22/24.
-//
 
 import SwiftUI
 import UIKit
