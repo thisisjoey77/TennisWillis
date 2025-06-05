@@ -23,12 +23,13 @@ struct PlayerScore {
 }
 
 struct GameView: View {
-    @State var chosen = Array(Teams.keys)[0]
-    @State var livePlayer1 : String = ""
-    @State var livePlayer2 : String = ""
+    @State var chosen = (Array(Teams.keys).count>0) ? Array(Teams.keys)[0] : ""
+    @State var livePlayer1 : String = (Teams.count>0 && Teams[Array(Teams.keys)[0]]!.count>1) ? Teams[Array(Teams.keys)[0]]![0].title : ""
+    @State var livePlayer2 : String = (Teams.count>0 && Teams[Array(Teams.keys)[0]]!.count>1) ? Teams[Array(Teams.keys)[0]]![1].title : ""
     @State var numberOfSets = 1
     @State var navigateToGame = false
     let rosterNames : [String] = Teams.map((\.key))
+    var possibleGo : Bool = false
     
     init() {
          // Set background color of the selected segment
@@ -45,110 +46,125 @@ struct GameView: View {
              [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
              for: .normal
          )
+        let tempArr = Array(Teams.keys).count>0 ? Array(Teams.keys) : []
+        for nme in tempArr {
+            if(Teams[nme]!.count>=2) {
+                possibleGo = true;
+                break;
+            }
+        }
+        
      }
     
     var body: some View {
-        VStack(alignment:.center) {
-            NavigationView {
-                VStack(spacing: 30) {
-                    Text("Match Setup")
-                        .font(.title)
-                        .bold()
-                        .padding(.top, 20)
-                    
-                    // Roster selection
-                    VStack {
-                        Text("Selected Roster")
-                            .font(.headline)
+        if(!possibleGo) {
+            Text("Please make a team with at least two players.")
+        }
+        else {
+            VStack(alignment:.center) {
+                NavigationView {
+                    VStack(spacing: 30) {
+                        Text("Match Setup")
+                            .font(.title)
+                            .bold()
+                            .padding(.top, 20)
                         
-                        Picker("Rosters", selection: $chosen) {
-                            ForEach(rosterNames, id: \.self) { team in
-                                Text(team).tag(team)
+                        // Roster selection
+                        VStack {
+                            Text("Selected Roster")
+                                .font(.headline)
+                            
+                            Picker("Rosters", selection: $chosen) {
+                                ForEach(rosterNames, id: \.self) { team in
+                                    if(Teams[team]!.count>1) {
+                                        Text(team).tag(team)
+                                    }
+                                }
                             }
-                        }
-                        .onChange(of: chosen) { _ in
-                            livePlayer1 = "";
-                            livePlayer2 = "";
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
-                    }
-                    
-                    // Player 1 Selection
-                    VStack(alignment: .leading) {
-                        Text("Select Player 1")
-                            .font(.headline)
-                        
-                        Picker("Player 1", selection: $livePlayer1) {
-                            ForEach(Teams[chosen] ?? [], id: \.id) { player in
-                                Text(player.title).tag(player.title)
-                                .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                            .onChange(of: chosen) { _ in
+                                livePlayer1 = Teams[chosen]![0].title
+                                livePlayer2 = Teams[chosen]![1].title
                             }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal)
                         }
-                        .pickerStyle(MenuPickerStyle())
-                        .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                    }
-                    
-                    // Player 2 Selection
-                    VStack(alignment: .leading) {
-                        Text("Select Player 2")
-                            .font(.headline)
                         
-                        Picker("Player 2", selection: $livePlayer2) {
-                            ForEach(Teams[chosen] ?? [], id: \.id) {
-                                player in
-                                Text(player.title).tag(player.title)
-                                .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                        // Player 1 Selection
+                        VStack(alignment: .leading) {
+                            Text("Select Player 1")
+                                .font(.headline)
+                            
+                            Picker("Player 1", selection: $livePlayer1) {
+                                ForEach(Teams[chosen] ?? [], id: \.id) { player in
+                                    Text(player.title).tag(player.title)
+                                        .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                                }
                             }
+                            .pickerStyle(MenuPickerStyle())
+                            .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                         }
-                        .pickerStyle(MenuPickerStyle())
-                        .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                    }
-                    
-                    // Set Selection
-                    VStack {
-                        Text("Number of Sets")
-                            .font(.headline)
                         
-                        Picker("Sets", selection: $numberOfSets) {
-                            Text("1 Set").tag(1)
-                            Text("3 Sets").tag(3)
+                        // Player 2 Selection
+                        VStack(alignment: .leading) {
+                            Text("Select Player 2")
+                                .font(.headline)
+                            
+                            Picker("Player 2", selection: $livePlayer2) {
+                                ForEach(Teams[chosen] ?? [], id: \.id) {
+                                    player in
+                                    Text(player.title).tag(player.title)
+                                        .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                            .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                         }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
-                    }
-                    
-                    // Start Match Button
-                    if(livePlayer1.count>0 && livePlayer2.count>0) {
-                        Button(action: {
-                            navigateToGame = true
-                        }) {
-                            Text("Start Match")
-                                .frame(width:200)
+                        
+                        // Set Selection
+                        VStack {
+                            Text("Number of Sets")
+                                .font(.headline)
+                            
+                            Picker("Sets", selection: $numberOfSets) {
+                                Text("1 Set").tag(1)
+                                Text("3 Sets").tag(3)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal)
                         }
-                        .frame(width: 200)
-                        .padding()
-                        .background(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.top, 30)
+                        
+                        // Start Match Button
+                        if(livePlayer1.count>0 && livePlayer2.count>0) {
+                            Button(action: {
+                                navigateToGame = true
+                            }) {
+                                Text("Start Match")
+                                    .frame(width:200)
+                            }
+                            .frame(width: 200)
+                            .padding()
+                            .background(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.top, 30)
+                        }
+                        Spacer()
+                        
+                        // Navigation to Game View
+                        NavigationLink(
+                            destination: LiveView(
+                                livePlayer1: $livePlayer1,
+                                livePlayer2: $livePlayer2,
+                                numberOfSets : $numberOfSets,
+                                referer: $chosen)
+                            .navigationBarBackButtonHidden(true),
+                            isActive: $navigateToGame
+                        ) {
+                            EmptyView()
+                        }
                     }
-                    Spacer()
-                    
-                    // Navigation to Game View
-                    NavigationLink(
-                        destination: LiveView(
-                            livePlayer1: $livePlayer1,
-                            livePlayer2: $livePlayer2,
-                            numberOfSets : $numberOfSets,
-                            referer: $chosen)
-                        .navigationBarBackButtonHidden(true),
-                        isActive: $navigateToGame
-                    ) {
-                        EmptyView()
-                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
         }
     }
