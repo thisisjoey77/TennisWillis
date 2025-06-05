@@ -3,7 +3,7 @@ import PDFKit
 
 struct RankView: View {
     @State private var selectedSort: String? = nil
-    @State private var referer: String = Array(Teams.keys)[0] // Default to Varsity Team
+    @State private var referer: String = (Array(Teams.keys).count != 0) ? Array(Teams.keys)[0] : "" // Default to Varsity Team
 
     let teamOptions = Array(Teams.keys);
     let sortOptions = ["Matches\nWon", "Matches\nLost", "Win Loss\nRatio", "Games\nWon", "Points\nWon"]
@@ -140,8 +140,8 @@ struct RankView: View {
     }
     
     func createPDFPage(from stats: [playerIcon], ref: String) -> PDFPage {
-        let pageWidth = 612.0  // 8.5 inches
-        let pageHeight = 792.0 // 11 inches
+        let pageWidth = 1000.0  // 8.5 inches
+        let pageHeight = 800.0 // 11 inches
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
 
         UIGraphicsBeginImageContext(pageRect.size)
