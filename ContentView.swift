@@ -1,8 +1,3 @@
-//
-//  ContentView.swift
-//  Tennis
-//
-
 import SwiftUI
 import UIKit
 import PDFKit
@@ -20,6 +15,21 @@ public struct playerIcon {
     var pointsWon : Int = 0
     var id : Int
     let title, imageUrl: String
+}
+
+public struct date {
+    var day : Int
+    var month : Int
+    var year : Int
+}
+
+public struct game {
+    var winnerIndex: Int
+    var players: [String]
+    var gameDate : date
+    var stats: [PlayerScore]
+    var roster: String
+    var setType: Int
 }
 
 enum BottomTab : String {
@@ -48,6 +58,8 @@ var Teams: [String: [playerIcon]] = [
                 playerIcon(id:6,title:"Michael Connor", imageUrl: "person"),
             ]
         ]
+
+var Games : [game] = []
 
 struct ContentView: View {
     @State var currentTab : BottomTab = .home
