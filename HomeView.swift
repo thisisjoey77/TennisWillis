@@ -1,8 +1,3 @@
-//
-//  HomeView.swift
-//  Tennis
-//
-
 import SwiftUI
 
 struct HomeView: View {
