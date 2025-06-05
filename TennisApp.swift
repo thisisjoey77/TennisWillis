@@ -1,8 +1,3 @@
-//
-//  TennisApp.swift
-//  Tennis
-//
-
 import SwiftUI
 
 @main
