@@ -94,6 +94,16 @@ struct RankView: View {
                 }
                 .padding(.horizontal, 10)
             }
+            NavigationStack {
+                NavigationLink(
+                    destination: HistoryView()) {
+                        Text("View History")
+                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                            .fontWeight(.semibold)
+                            .padding(.vertical, 10)
+                    }
+                    .padding(.horizontal)
+            }
             Button(action: {
                 let pdfDocument = PDFDocument()
                     let pdfPage = createPDFPage(from: Teams[referer] ?? [], ref: referer)
@@ -149,7 +159,7 @@ struct RankView: View {
         title.draw(at: CGPoint(x: 72, y: 40), withAttributes: titleAttributes)
 
         // Draw table headers
-        let headers = ["Player", "Aces", "Double Faults", "Games Won"]
+        let headers = ["Player", "MWIN", "MLOS", "WLR", "GWIN", "PWIN"]
         let startX: CGFloat = 72
         var startY: CGFloat = 100
         let columnWidth: CGFloat = 120
@@ -165,10 +175,13 @@ struct RankView: View {
         for stat in stats {
             let row = [
                 stat.title,
-                "\(stat.aces)",
-                "\(stat.doubleFaults)",
                 "\(stat.matchWon)",
+                "\(stat.matchLost)",
+                String(format: "%.3f", ((stat.matchWon + stat.matchLost) == 0 ? 0.0 : (Double(stat.matchWon) / Double(stat.matchWon + stat.matchLost)))),
+                "\(stat.gamesWon)",
+                "\(stat.pointsWon)"
             ]
+            
             for (i, value) in row.enumerated() {
                 value.draw(at: CGPoint(x: startX + CGFloat(i) * columnWidth, y: startY),
                            withAttributes: [.font: UIFont.systemFont(ofSize: 14)])
@@ -223,6 +236,64 @@ struct RankView: View {
             return players.sorted { (pointArr[$0] ?? 0) > (pointArr[$1] ?? 0) }
         default:
             return players
+        }
+    }
+}
+
+struct HistoryView : View {
+    var body: some View {
+        VStack(alignment: .center, spacing:0) {
+            ForEach(0..<Games.count) { i in
+                VStack(spacing: 0) {
+                    Text("Date: " + String(Games[i].gameDate.year) + "/\(Games[i].gameDate.month)/\(Games[i].gameDate.day)")
+                        .frame(width: CGFloat(150 + Games[i].setType * 60), height: 40)
+                            .border(Color.black)
+                    HStack(spacing:0) {
+                        Text("Player")
+                            .frame(width: 150, height: 40)
+                            .border(Color.black)
+                        ForEach(1...Games[i].setType, id: \.self) { set in
+                            Text("Set \(set)")
+                                .frame(width: 60, height: 40)
+                                .bold()
+                                .border(Color.black)
+                        }
+                    }
+                    ForEach(0..<2) { j in
+                        PastPlayerRow(
+                            targetPlayer: Games[i].stats[j],
+                            isWinner: (Games[i].winnerIndex==j) ? true : false
+                        )
+                    }
+                    
+                }.padding()
+            }
+        }
+    }
+}
+
+struct PastPlayerRow: View {
+    let targetPlayer : PlayerScore
+    let isWinner: Bool
+    
+    var body: some View {
+        VStack(spacing:0) {
+            HStack(spacing:0) {
+                Text(targetPlayer.name)
+                        .frame(width: 150, height: 40)
+                        .bold()
+                        .border(Color.black)
+                        .background(isWinner==true ? Color(red: 2 / 255, green:40 / 255, blue: 141 / 255) : Color.white)
+                        .foregroundColor(isWinner==true ? Color.white : Color.black)
+                    
+                    ForEach(targetPlayer.setScores, id: \.self) { set in
+                        Text("\(set)")
+                            .frame(width: 60, height: 40)
+                            .border(Color.black)
+                            .background(isWinner==true ? Color(red: 2 / 255, green:40 / 255, blue: 141 / 255) : Color.white)
+                            .foregroundColor(isWinner==true ? Color.white : Color.black)
+                    }
+            }
         }
     }
 }
