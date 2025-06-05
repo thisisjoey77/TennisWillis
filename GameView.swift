@@ -1,13 +1,5 @@
-//
-//  Selection.swift
-//  TennisApp
-//
 import SwiftUI
 
-
-//6:6 deuce 나중에 물어보기
-
-//setMax is 6
 let setMax : Int = 2
 var winner : String = ""
 
@@ -31,7 +23,7 @@ struct PlayerScore {
 }
 
 struct GameView: View {
-    @State var chosen = "Varsity Team"
+    @State var chosen = Array(Teams.keys)[0]
     @State var livePlayer1 : String = ""
     @State var livePlayer2 : String = ""
     @State var numberOfSets = 1
@@ -53,7 +45,6 @@ struct GameView: View {
              [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
              for: .normal
          )
-        chosen = rosterNames[0]
      }
     
     var body: some View {
@@ -340,6 +331,19 @@ struct LiveView: View {
         }
         else if(goToResults==false) {
             Button(action: {
+                let now = Date()
+                let calendar = Calendar.current
+
+                let year = calendar.component(.year, from: now)
+                let month = calendar.component(.month, from: now)
+                let day = calendar.component(.day, from: now)
+                
+                Games.append(game (
+                    winnerIndex: (playerData[1].setVictory > numberOfSets/2) ? 1 : 0,
+                    players: [livePlayer1, livePlayer2],
+                    gameDate: date(day:day, month:month, year:year),
+                    stats: playerData,
+                    roster: referer,setType:setSize))
                 goToResults = true  // Trigger navigation
             }) {
                 Text("Results")
