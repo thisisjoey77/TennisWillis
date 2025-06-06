@@ -96,7 +96,7 @@ struct RankView: View {
             }
             NavigationStack {
                 NavigationLink(
-                    destination: HistoryView()) {
+                    destination: HistoryView(roster:referer)) {
                         Text("View History")
                             .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                             .fontWeight(.semibold)
@@ -241,32 +241,36 @@ struct RankView: View {
 }
 
 struct HistoryView : View {
+    let roster : String;
+    
     var body: some View {
         VStack(alignment: .center, spacing:0) {
             ForEach(0..<Games.count) { i in
-                VStack(spacing: 0) {
-                    Text("Date: " + String(Games[i].gameDate.year) + "/\(Games[i].gameDate.month)/\(Games[i].gameDate.day)")
-                        .frame(width: CGFloat(150 + Games[i].setType * 60), height: 40)
+                if(Games[i].roster==roster) {
+                    VStack(spacing: 0) {
+                        Text("Date: " + String(Games[i].gameDate.year) + "/\(Games[i].gameDate.month)/\(Games[i].gameDate.day)")
+                            .frame(width: CGFloat(150 + Games[i].setType * 60), height: 40)
                             .border(Color.black)
-                    HStack(spacing:0) {
-                        Text("Player")
-                            .frame(width: 150, height: 40)
-                            .border(Color.black)
-                        ForEach(1...Games[i].setType, id: \.self) { set in
-                            Text("Set \(set)")
-                                .frame(width: 60, height: 40)
-                                .bold()
+                        HStack(spacing:0) {
+                            Text("Player")
+                                .frame(width: 150, height: 40)
                                 .border(Color.black)
+                            ForEach(1...Games[i].setType, id: \.self) { set in
+                                Text("Set \(set)")
+                                    .frame(width: 60, height: 40)
+                                    .bold()
+                                    .border(Color.black)
+                            }
                         }
-                    }
-                    ForEach(0..<2) { j in
-                        PastPlayerRow(
-                            targetPlayer: Games[i].stats[j],
-                            isWinner: (Games[i].winnerIndex==j) ? true : false
-                        )
-                    }
-                    
-                }.padding()
+                        ForEach(0..<2) { j in
+                            PastPlayerRow(
+                                targetPlayer: Games[i].stats[j],
+                                isWinner: (Games[i].winnerIndex==j) ? true : false
+                            )
+                        }
+                        
+                    }.padding()
+                }
             }
         }
     }
