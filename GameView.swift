@@ -516,6 +516,7 @@ struct GameAnalysisView: View {
                             applyToPlayers(PStat: PStat1)
                             applyToPlayers(PStat: PStat2)
                             navigateToHome = true
+                            TeamDataManager.save(Teams)
                         }) {
                             Text("End Match")
                                 .frame(maxWidth: .infinity)
@@ -820,3 +821,4 @@ extension View {
 #Preview {
     GameView()
 }
+
