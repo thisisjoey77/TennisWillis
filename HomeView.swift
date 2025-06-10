@@ -93,6 +93,7 @@ struct ModTeamView : View {
             HStack {
                 Button(action: {
                     finishedEditing = true  // Trigger navigation
+                    TeamDataManager.save(Teams)
                 }) {
                     Text("Make changes")
                         .frame(maxWidth: .infinity)
@@ -164,6 +165,7 @@ struct DetailGameView : View {
                 // Buttons
                 HStack {
                     Button(action: {
+                        TeamDataManager.save(Teams)
                         finishedEditing = true  // Trigger navigation
                     }) {
                         Text("Make changes")
@@ -198,3 +200,4 @@ struct ModNameView : View {
 #Preview {
     HomeView()
 }
+
