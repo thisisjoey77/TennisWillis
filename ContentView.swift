@@ -2,19 +2,22 @@ import SwiftUI
 import UIKit
 import PDFKit
 
-public struct playerIcon {
-    var faults : Int = 0
-    var doubleFaults : Int = 0
-    var aces : Int = 0
-    var errors : Int = 0
-    var violations : Int = 0
-    var matchWon : Int = 0
-    var matchLost : Int = 0
-    var setsWon : Int = 0
-    var gamesWon : Int = 0
-    var pointsWon : Int = 0
-    var id : Int
-    let title, imageUrl: String
+struct playerIcon: Identifiable, Codable, Hashable {
+    public var id: Int
+    var title: String
+    var imageUrl: String
+
+    var matchWon: Int = 0
+    var matchLost: Int = 0
+    var gamesWon: Int = 0
+    var pointsWon: Int = 0
+    var faults: Int = 0
+    var doubleFaults: Int = 0
+    var aces: Int = 0
+    var winners: Int = 0
+    var errors: Int = 0
+    var violations: Int = 0
+    var setsWon: Int = 0
 }
 
 public struct date {
@@ -93,6 +96,11 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            if let loaded = TeamDataManager.load() {
+                Teams = loaded
+            }
+        }
     }
     
 }
@@ -114,4 +122,30 @@ struct PlayerView : View {
 
 #Preview {
     ContentView()
+}
+
+import Foundation
+
+class TeamDataManager {
+    static let fileName = "teams_data.json"
+
+    static func save(_ teams: [String: [playerIcon]]) {
+        let url = getDocumentsDirectory().appendingPathComponent(fileName)
+        if let encoded = try? JSONEncoder().encode(teams) {
+            try? encoded.write(to: url)
+        }
+    }
+
+    static func load() -> [String: [playerIcon]]? {
+        let url = getDocumentsDirectory().appendingPathComponent(fileName)
+        if let data = try? Data(contentsOf: url),
+           let decoded = try? JSONDecoder().decode([String: [playerIcon]].self, from: data) {
+            return decoded
+        }
+        return nil
+    }
+
+    private static func getDocumentsDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
 }
