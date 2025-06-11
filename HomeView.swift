@@ -2,20 +2,21 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        GeometryReader { geo in
-            VStack(spacing: 10) {
-                NavigationStack {
+        NavigationStack {
+            ScrollView(.vertical) {
+                VStack(spacing: 10) {
                     HStack {
                         Spacer()
                         NavigationLink(
                             destination: ModTeamView().navigationBarBackButtonHidden(true)) {
                                 Text("Edit")
-                                    .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                                    .foregroundColor(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
                             }
                             .padding(.horizontal)
                     }
+
                     ForEach(Array(Teams.keys), id: \.self) { teamName in
-                        if Teams[teamName] != nil {
+                        if let varsityArr = Teams[teamName] {
                             VStack(alignment: .leading) {
                                 NavigationLink(
                                     destination: DetailGameView(referer: teamName).navigationBarBackButtonHidden(true)) {
@@ -23,15 +24,15 @@ struct HomeView: View {
                                             .font(.title)
                                             .fontWeight(.bold)
                                             .padding(.horizontal)
-                                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                                            .foregroundColor(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
                                             .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
+                                }
+
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack {
-                                        if let varsityArr = Teams[teamName] {
-                                            ForEach(varsityArr, id : \.id) { player in
-                                                PlayerView(player: player).padding(.horizontal, 10)
-                                            }
+                                        ForEach(varsityArr, id: \.id) { player in
+                                            PlayerView(player: player)
+                                                .padding(.horizontal, 10)
                                         }
                                     }
                                 }
@@ -39,14 +40,12 @@ struct HomeView: View {
                         }
                     }
                 }
-                
-            }.position(
-                x: geo.size.width / 2,
-                y: geo.size.height / 2
-            )
+                .padding(.vertical)
+            }
         }
     }
 }
+
 
 struct ModTeamView : View {
     @State private var finishedEditing = false
