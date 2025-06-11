@@ -30,110 +30,115 @@ struct RankView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-
-            Picker("", selection: $referer) {
-                ForEach(teamOptions, id: \.self) { option in
-                    Text(option)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.bottom, 10)
-            .onChange(of: referer) { newValue in
-                renewSpecArray(referer: newValue)
-            }
-
-            HStack(alignment: .top) {
-                Text("Player")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 10)
-                    .cornerRadius(12)
-                ForEach(Array(sortOptAbrv.enumerated()), id: \.element) {(index, element) in
-                    Button(action: {
-                        selectedSort = sortOptions[index].replacingOccurrences(of: "\n", with: " ")
-                    }) {
-                        Text(element)
-                            .fontWeight(.semibold)
-                            .font(.caption)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                            .background(selectedSort == sortOptions[index].replacingOccurrences(of: "\n", with: " ") ? Color.blue.opacity(0.3) : Color.clear)
-                            .cornerRadius(12)
-                    }
-                }
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 10)
-
-            let players = sortedPlayers()
-            ForEach(players, id: \.self) { player in
-                HStack(alignment: .top) {
-                    Text(player)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.caption)
-                        .padding(.vertical, 8)
-                    Text("\(matchWArr[player] ?? 0)")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                    Text("\(matchLArr[player] ?? 0)")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                    Text(String(format: "%.3f", Double(matchRArr[player] ?? 0)))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                    Text("\(gameArr[player] ?? 0)")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                    Text("\(pointArr[player] ?? 0)")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                }
-                .padding(.horizontal, 10)
-            }
-            NavigationStack {
-                NavigationLink(
-                    destination: HistoryView(roster:referer)) {
-                        Text("View History")
-                            .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                            .fontWeight(.semibold)
-                            .padding(.vertical, 10)
-                    }
-                    .padding(.horizontal)
-            }
-            Button(action: {
-                let pdfDocument = PDFDocument()
-                    let pdfPage = createPDFPage(from: Teams[referer] ?? [], ref: referer)
-                    pdfDocument.insert(pdfPage, at: 0)
-
-                    if let documentData = pdfDocument.dataRepresentation() {
-                        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("TennisStats.pdf")
-                        do {
-                            try documentData.write(to: tempURL)
-                            
-                            // Present Document Picker to export the file
-                            let picker = UIDocumentPickerViewController(forExporting: [tempURL])
-                            picker.shouldShowFileExtensions = true
-                            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                               let root = scene.windows.first?.rootViewController {
-                                root.present(picker, animated: true)
-                            }
-                        } catch {
-                            print("Could not save PDF temporarily: \(error)")
+            ScrollView(.vertical) {
+                VStack(spacing: 0) {
+                    Picker("", selection: $referer) {
+                        ForEach(teamOptions, id: \.self) { option in
+                            Text(option)
+                                .font(.caption)
+                                .fontWeight(.semibold)
                         }
                     }
-            })
-            {
-                Text("Export Data")
-                .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
-                .fontWeight(.semibold)
-                .padding(.vertical, 10)
-            }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.bottom, 10)
+                    .onChange(of: referer) { newValue in
+                        renewSpecArray(referer: newValue)
+                    }
+                    
+                    HStack(alignment: .top) {
+                        Text("Player")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 10)
+                            .cornerRadius(12)
+                        ForEach(Array(sortOptAbrv.enumerated()), id: \.element) { (index, element) in
+                            Button(action: {
+                                selectedSort = sortOptions[index].replacingOccurrences(of: "\n", with: " ")
+                            }) {
+                                Text(element)
+                                    .fontWeight(.semibold)
+                                    .font(.caption)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 10)
+                                    .foregroundColor(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
+                                    .background(
+                                        selectedSort == sortOptions[index].replacingOccurrences(of: "\n", with: " ") ?
+                                        Color.blue.opacity(0.3) : Color.clear
+                                    )
+                                    .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
+                    
+                    let players = sortedPlayers()
+                    ForEach(players, id: \.self) { player in
+                        HStack(alignment: .top) {
+                            Text(player)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .font(.caption)
+                                .padding(.vertical, 8)
+                            Text("\(matchWArr[player] ?? 0)")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                            Text("\(matchLArr[player] ?? 0)")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                            Text(String(format: "%.3f", Double(matchRArr[player] ?? 0)))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                            Text("\(gameArr[player] ?? 0)")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                            Text("\(pointArr[player] ?? 0)")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                        }
+                        .padding(.horizontal, 10)
+                    }
+                }.padding(.top, 20)
+                Divider()
+                VStack(spacing: 0) {
+                    NavigationStack {
+                        NavigationLink(destination: HistoryView(roster: referer)) {
+                            Text("View History")
+                                .foregroundColor(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
+                                .fontWeight(.semibold)
+                                .padding(.vertical, 10)
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                    Button(action: {
+                        let pdfDocument = PDFDocument()
+                        let pdfPage = createPDFPage(from: Teams[referer] ?? [], ref: referer)
+                        pdfDocument.insert(pdfPage, at: 0)
+                        
+                        if let documentData = pdfDocument.dataRepresentation() {
+                            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("TennisStats.pdf")
+                            do {
+                                try documentData.write(to: tempURL)
+                                let picker = UIDocumentPickerViewController(forExporting: [tempURL])
+                                picker.shouldShowFileExtensions = true
+                                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                   let root = scene.windows.first?.rootViewController {
+                                    root.present(picker, animated: true)
+                                }
+                            } catch {
+                                print("Could not save PDF temporarily: \(error)")
+                            }
+                        }
+                    }) {
+                        Text("Export Data")
+                            .foregroundColor(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
+                            .fontWeight(.semibold)
+                            .padding(.vertical, 10)
+                    }
+                }
+            }.padding(.top, 20)
         }
-        .position(x:200, y:250)
         .onAppear {
             renewSpecArray(referer: referer)
         }
