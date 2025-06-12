@@ -15,6 +15,7 @@ struct TennisApp: App {
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .background {
                 TeamDataManager.save(Teams)
+                GameDataManager.save(Games)
             }
         }
     }
