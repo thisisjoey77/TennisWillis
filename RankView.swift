@@ -2,10 +2,13 @@ import SwiftUI
 import PDFKit
 
 struct RankView: View {
+    @EnvironmentObject var appData: AppData
     @State private var selectedSort: String? = nil
-    @State private var referer: String = (Array(Teams.keys).count != 0) ? Array(Teams.keys)[0] : "" // Default to Varsity Team
-
-    let teamOptions = Array(Teams.keys);
+    @State private var referer: String = ""
+    
+    var teamOptions: [String] {
+        Array(appData.teams.keys)
+    }
     let sortOptions = ["Matches\nWon", "Matches\nLost", "Win Loss\nRatio", "Games\nWon", "Points\nWon"]
     let sortOptAbrv = ["MWIN", "MLOS", "WLR", "GWIN", "PWIN"]
     
@@ -16,17 +19,16 @@ struct RankView: View {
     @State private var pointArr: [String: Int] = [:]
     
     init() {
-            UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)
-            
-            UISegmentedControl.appearance().setTitleTextAttributes(
-                [.foregroundColor: UIColor.white],
-                for: .selected
-            )
-            UISegmentedControl.appearance().setTitleTextAttributes(
-                [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
-                for: .normal
-            )
-        }
+        UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor.white],
+            for: .selected
+        )
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
+            for: .normal
+        )
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -43,6 +45,12 @@ struct RankView: View {
                     .padding(.bottom, 10)
                     .onChange(of: referer) { newValue in
                         renewSpecArray(referer: newValue)
+                    }
+                    .onAppear {
+                        if referer.isEmpty, let first = teamOptions.first {
+                            referer = first
+                            renewSpecArray(referer: first)
+                        }
                     }
                     
                     HStack(alignment: .top) {
@@ -102,7 +110,7 @@ struct RankView: View {
                 Divider()
                 VStack(spacing: 0) {
                     NavigationStack {
-                        NavigationLink(destination: HistoryView(roster: referer)) {
+                        NavigationLink(destination: HistoryView(roster: referer).environmentObject(appData)) {
                             Text("View History")
                                 .foregroundColor(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
                                 .fontWeight(.semibold)
@@ -113,7 +121,7 @@ struct RankView: View {
                     
                     Button(action: {
                         let pdfDocument = PDFDocument()
-                        let pdfPage = createPDFPage(from: Teams[referer] ?? [], ref: referer)
+                        let pdfPage = createPDFPage(from: appData.teams[referer] ?? [], ref: referer)
                         pdfDocument.insert(pdfPage, at: 0)
                         
                         if let documentData = pdfDocument.dataRepresentation() {
@@ -140,6 +148,9 @@ struct RankView: View {
             }.padding(.top, 20)
         }
         .onAppear {
+            if referer.isEmpty, let first = teamOptions.first {
+                referer = first
+            }
             renewSpecArray(referer: referer)
         }
     }
@@ -212,7 +223,7 @@ struct RankView: View {
         gameArr.removeAll()
         pointArr.removeAll()
 
-        if let teamArr = Teams[referer] {
+        if let teamArr = appData.teams[referer] {
             for player in teamArr {
                 matchWArr[player.title] = player.matchWon
                 matchLArr[player.title] = player.matchLost
@@ -246,31 +257,32 @@ struct RankView: View {
 }
 
 struct HistoryView : View {
+    @EnvironmentObject var appData: AppData
     let roster : String;
     
     var body: some View {
         VStack(alignment: .center, spacing:0) {
-            ForEach(0..<Games.count) { i in
-                if(Games[i].roster==roster) {
+            ForEach(0..<(appData.games.count), id: \.self) { i in
+                if(appData.games[i].roster==roster) {
                     VStack(spacing: 0) {
-                        Text("Date: " + String(Games[i].gameDate.year) + "/\(Games[i].gameDate.month)/\(Games[i].gameDate.day)")
-                            .frame(width: CGFloat(150 + Games[i].setType * 60), height: 40)
+                        Text("Date: " + String(appData.games[i].gameDate.year) + "/\(appData.games[i].gameDate.month)/\(appData.games[i].gameDate.day)")
+                            .frame(width: CGFloat(150 + appData.games[i].setType * 60), height: 40)
                             .border(Color.black)
                         HStack(spacing:0) {
                             Text("Player")
                                 .frame(width: 150, height: 40)
                                 .border(Color.black)
-                            ForEach(1...Games[i].setType, id: \.self) { set in
+                            ForEach(1...appData.games[i].setType, id: \.self) { set in
                                 Text("Set \(set)")
                                     .frame(width: 60, height: 40)
                                     .bold()
                                     .border(Color.black)
                             }
                         }
-                        ForEach(0..<2) { j in
+                        ForEach(0..<2, id: \.self) { j in
                             PastPlayerRow(
-                                targetPlayer: Games[i].stats[j],
-                                isWinner: (Games[i].winnerIndex==j) ? true : false
+                                targetPlayer: appData.games[i].stats[j],
+                                isWinner: (appData.games[i].winnerIndex==j) ? true : false
                             )
                         }
                         
@@ -308,5 +320,5 @@ struct PastPlayerRow: View {
 }
 
 #Preview {
-    RankView()
+    RankView().environmentObject(AppData())
 }
