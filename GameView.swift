@@ -3,7 +3,7 @@ import SwiftUI
 let setMax : Int = 2
 var winner : String = ""
 
-struct PlayerScore {
+struct PlayerScore: Codable {
     var name: String
     var setScores: [Int]
     var faults : Int = 0
@@ -517,6 +517,7 @@ struct GameAnalysisView: View {
                             applyToPlayers(PStat: PStat2)
                             navigateToHome = true
                             TeamDataManager.save(Teams)
+                            GameDataManager.save(Games)
                         }) {
                             Text("End Match")
                                 .frame(maxWidth: .infinity)
