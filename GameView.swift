@@ -19,48 +19,40 @@ struct PlayerScore: Codable {
     var matchLost : Int = 0
     var gamesWon : Int = 0
     var pointsWon : Int = 0
-
 }
 
 struct GameView: View {
-    @State var chosen = (Array(Teams.keys).count>0) ? Array(Teams.keys)[0] : ""
-    @State var livePlayer1 : String = (Teams.count>0 && Teams[Array(Teams.keys)[0]]!.count>1) ? Teams[Array(Teams.keys)[0]]![0].title : ""
-    @State var livePlayer2 : String = (Teams.count>0 && Teams[Array(Teams.keys)[0]]!.count>1) ? Teams[Array(Teams.keys)[0]]![1].title : ""
+    @EnvironmentObject var appData: AppData
+    @State var chosen = ""
+    @State var livePlayer1 : String = ""
+    @State var livePlayer2 : String = ""
     @State var numberOfSets = 1
     @State var navigateToGame = false
-    let rosterNames : [String] = Teams.map((\.key))
-    var possibleGo : Bool = false
-    
+
+    var validTeams: [String] {
+        appData.teams.filter { $0.value.count > 1 }.map { $0.key }
+    }
+    var rosterNames: [String] {
+        Array(appData.teams.keys)
+    }
+
     init() {
-         // Set background color of the selected segment
-         UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)
-         
-         // Set text color for selected segment
-         UISegmentedControl.appearance().setTitleTextAttributes(
-             [.foregroundColor: UIColor.white],
-             for: .selected
-         )
-         
-         // Set text color for unselected segments
-         UISegmentedControl.appearance().setTitleTextAttributes(
-             [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
-             for: .normal
-         )
-        let tempArr = Array(Teams.keys).count>0 ? Array(Teams.keys) : []
-        for nme in tempArr {
-            if(Teams[nme]!.count>=2) {
-                possibleGo = true;
-                break;
-            }
-        }
-        
-     }
-    
+        UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor.white],
+            for: .selected
+        )
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor(red: 2/255, green: 40/255, blue: 141/255, alpha: 1.0)],
+            for: .normal
+        )
+    }
+
     var body: some View {
-        if(!possibleGo) {
+        let possibleGo = appData.teams.values.contains { $0.count >= 2 }
+        if !possibleGo {
             Text("Please make a team with at least two players.")
-        }
-        else {
+        } else {
             VStack(alignment:.center) {
                 NavigationView {
                     VStack(spacing: 30) {
@@ -73,17 +65,16 @@ struct GameView: View {
                         VStack {
                             Text("Selected Roster")
                                 .font(.headline)
-                            
                             Picker("Rosters", selection: $chosen) {
-                                ForEach(rosterNames, id: \.self) { team in
-                                    if(Teams[team]!.count>1) {
-                                        Text(team).tag(team)
-                                    }
+                                ForEach(validTeams, id: \.self) { team in
+                                    Text(team).tag(team)
                                 }
                             }
                             .onChange(of: chosen) { _ in
-                                livePlayer1 = Teams[chosen]![0].title
-                                livePlayer2 = Teams[chosen]![1].title
+                                if let players = appData.teams[chosen], players.count > 1 {
+                                    livePlayer1 = players[0].title
+                                    livePlayer2 = players[1].title
+                                }
                             }
                             .pickerStyle(SegmentedPickerStyle())
                             .padding(.horizontal)
@@ -93,11 +84,9 @@ struct GameView: View {
                         VStack(alignment: .leading) {
                             Text("Select Player 1")
                                 .font(.headline)
-                            
                             Picker("Player 1", selection: $livePlayer1) {
-                                ForEach(Teams[chosen] ?? [], id: \.id) { player in
+                                ForEach(appData.teams[chosen] ?? [], id: \.id) { player in
                                     Text(player.title).tag(player.title)
-                                        .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                                 }
                             }
                             .pickerStyle(MenuPickerStyle())
@@ -108,12 +97,9 @@ struct GameView: View {
                         VStack(alignment: .leading) {
                             Text("Select Player 2")
                                 .font(.headline)
-                            
                             Picker("Player 2", selection: $livePlayer2) {
-                                ForEach(Teams[chosen] ?? [], id: \.id) {
-                                    player in
+                                ForEach(appData.teams[chosen] ?? [], id: \.id) { player in
                                     Text(player.title).tag(player.title)
-                                        .foregroundColor(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                                 }
                             }
                             .pickerStyle(MenuPickerStyle())
@@ -124,7 +110,6 @@ struct GameView: View {
                         VStack {
                             Text("Number of Sets")
                                 .font(.headline)
-                            
                             Picker("Sets", selection: $numberOfSets) {
                                 Text("1 Set").tag(1)
                                 Text("3 Sets").tag(3)
@@ -149,21 +134,29 @@ struct GameView: View {
                             .padding(.top, 30)
                         }
                         Spacer()
-                        
-                        // Navigation to Game View
-                        NavigationLink(
-                            destination: LiveView(
-                                livePlayer1: $livePlayer1,
-                                livePlayer2: $livePlayer2,
-                                numberOfSets : $numberOfSets,
-                                referer: $chosen)
-                            .navigationBarBackButtonHidden(true),
-                            isActive: $navigateToGame
-                        ) {
-                            EmptyView()
-                        }
                     }
                     .padding(.horizontal)
+                }
+            }
+            .fullScreenCover(isPresented: $navigateToGame) {
+                LiveView(
+                    livePlayer1: $livePlayer1,
+                    livePlayer2: $livePlayer2,
+                    numberOfSets: $numberOfSets,
+                    referer: $chosen
+                )
+                .environmentObject(appData)
+            }
+            .onAppear {
+                if !validTeams.contains(chosen), let first = validTeams.first {
+                    chosen = first
+                }
+            }
+            .onChange(of: appData.teams) { _ in
+                if !validTeams.contains(chosen), let first = validTeams.first {
+                    chosen = first
+                } else if validTeams.isEmpty {
+                    chosen = ""
                 }
             }
         }
@@ -171,7 +164,7 @@ struct GameView: View {
 }
 
 struct LiveView: View {
-    
+    @EnvironmentObject var appData: AppData
     @State private var showScoringButtons = false
    // let tennispoints = [0, 15, 30, 40]
     @State private var tennispoints = [0, 15, 30, 40]
@@ -194,12 +187,15 @@ struct LiveView: View {
     let setSize : Int
 
     init(livePlayer1 : Binding<String>, livePlayer2 : Binding<String>, numberOfSets : Binding<Int>, referer: Binding<String>) {
-        _livePlayer1 = livePlayer1
-        _livePlayer2 = livePlayer2
-        _numberOfSets = numberOfSets
-        _referer = referer
-        setSize = numberOfSets.wrappedValue
-        _currentServerIs1 = State(initialValue: true)
+    _livePlayer1 = livePlayer1
+    _livePlayer2 = livePlayer2
+    _numberOfSets = numberOfSets
+    _referer = referer
+    setSize = numberOfSets.wrappedValue
+    _currentServerIs1 = State(initialValue: true)
+    
+    // Check if livePlayer1 and livePlayer2 are not empty before initializing playerData
+    if !livePlayer1.wrappedValue.isEmpty && !livePlayer2.wrappedValue.isEmpty {
         _playerData = State(initialValue: [
             PlayerScore(
                 name: livePlayer1.wrappedValue,
@@ -236,7 +232,14 @@ struct LiveView: View {
                 pointsWon : 0
             )
         ])
+    } else {
+        // If livePlayer1 or livePlayer2 is empty, initialize playerData with default values
+        _playerData = State(initialValue: [
+            PlayerScore(name: "Player 1", setScores: Array(repeating: 0, count: setSize)),
+            PlayerScore(name: "Player 2", setScores: Array(repeating: 0, count: setSize))
+        ])
     }
+}
     
     var body: some View {
         if(goToResults) {
@@ -354,7 +357,7 @@ struct LiveView: View {
                 let month = calendar.component(.month, from: now)
                 let day = calendar.component(.day, from: now)
                 
-                Games.append(game (
+                appData.games.append(game (
                     winnerIndex: (playerData[1].setVictory > numberOfSets/2) ? 1 : 0,
                     players: [livePlayer1, livePlayer2],
                     gameDate: date(day:day, month:month, year:year),
@@ -464,94 +467,84 @@ struct LiveView: View {
 }
 
 struct GameAnalysisView: View {
-    
+    @EnvironmentObject var appData: AppData
+    @Environment(\.dismiss) var dismiss // Add this line
     let PStat1: PlayerScore
     let PStat2: PlayerScore
     let referer: String
     let winner : String
-    
-    @State private var navigateToHome = false  // Track navigation
-    
+
     var body: some View {
-        if(!navigateToHome) {
-            NavigationStack {
-                VStack(alignment: .leading) {
-                    Text("Match won by \(winner)")
-                        .font(.title)
-                        .bold()
-                        .padding(.top, 20)
-                        .padding()
-                    Text("Game Analysis")
-                        .font(.title)
-                        .bold()
-                        .padding(.top, 20)
-                        .padding()
-                    
-                    // Table Headers
-                    HStack {
-                        Text("Stats").bold().frame(width: 150, alignment: .leading)
-                        Text(PStat1.name).bold().frame(width: 100)
-                        Text(PStat2.name).bold().frame(width: 100)
+        NavigationStack {
+            VStack(alignment: .leading) {
+                Text("Match won by \(winner)")
+                    .font(.title)
+                    .bold()
+                    .padding(.top, 20)
+                    .padding()
+                Text("Game Analysis")
+                    .font(.title)
+                    .bold()
+                    .padding(.top, 20)
+                    .padding()
+                
+                // Table Headers
+                HStack {
+                    Text("Stats").bold().frame(width: 150, alignment: .leading)
+                    Text(PStat1.name).bold().frame(width: 100)
+                    Text(PStat2.name).bold().frame(width: 100)
+                }
+                Divider()
+                
+                // Table Rows
+                statRow(label: "Points Won", value1: "\(PStat1.pointsWon)", value2: "\(PStat2.pointsWon)")
+                statRow(label: "Sets Won", value1: "\(PStat1.setVictory)", value2: "\(PStat2.setVictory)")
+                //CHANGE
+                statRow(label: "Games Won", value1: "\(PStat1.gamesWon)", value2: "\(PStat2.gamesWon)")
+                 
+                statRow(label: "Faults", value1: "\(PStat1.faults)", value2: "\(PStat2.faults)")
+                statRow(label: "Double Faults", value1: "\(PStat1.doubleFaults)", value2: "\(PStat2.doubleFaults)")
+                statRow(label: "Aces", value1: "\(PStat1.aces)", value2: "\(PStat2.aces)")
+                statRow(label: "Winners", value1: "\(PStat1.winners)", value2: "\(PStat2.winners)")
+                statRow(label: "Errors", value1: "\(PStat1.errors)", value2: "\(PStat2.errors)")
+                statRow(label: "Violations", value1: "\(PStat1.violations)", value2: "\(PStat2.violations)")
+                
+                Spacer()
+                
+                // Buttons
+                HStack {
+                    Button(action: {
+                        applyToPlayers(PStat: PStat1)
+                        applyToPlayers(PStat: PStat2)
+                        TeamDataManager.save(appData.teams)
+                        GameDataManager.save(appData.games)
+                        dismiss() // Dismiss instead of showing ContentView
+                    }) {
+                        Text("End Match")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
                     }
-                    Divider()
-                    
-                    // Table Rows
-                    statRow(label: "Points Won", value1: "\(PStat1.pointsWon)", value2: "\(PStat2.pointsWon)")
-                    statRow(label: "Sets Won", value1: "\(PStat1.setVictory)", value2: "\(PStat2.setVictory)")
-                    //CHANGE
-                    statRow(label: "Games Won", value1: "\(PStat1.gamesWon)", value2: "\(PStat2.gamesWon)")
-                     
-                    statRow(label: "Faults", value1: "\(PStat1.faults)", value2: "\(PStat2.faults)")
-                    statRow(label: "Double Faults", value1: "\(PStat1.doubleFaults)", value2: "\(PStat2.doubleFaults)")
-                    statRow(label: "Aces", value1: "\(PStat1.aces)", value2: "\(PStat2.aces)")
-                    statRow(label: "Winners", value1: "\(PStat1.winners)", value2: "\(PStat2.winners)")
-                    statRow(label: "Errors", value1: "\(PStat1.errors)", value2: "\(PStat2.errors)")
-                    statRow(label: "Violations", value1: "\(PStat1.violations)", value2: "\(PStat2.violations)")
-                    
-                    Spacer()
-                    
-                    // Buttons
-                    HStack {
-                        Button(action: {
-                            applyToPlayers(PStat: PStat1)
-                            applyToPlayers(PStat: PStat2)
-                            navigateToHome = true
-                            TeamDataManager.save(Teams)
-                            GameDataManager.save(Games)
-                        }) {
-                            Text("End Match")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .padding(.horizontal)
-                        }
-                    }.padding(.horizontal)
-                }.padding()
-            }
-        }
-        else {
-            ContentView().navigationBarBackButtonHidden(true)
+                }.padding(.horizontal)
+            }.padding()
         }
     }
-    
     func applyToPlayers(PStat: PlayerScore) {
-        if let index = Teams[referer]?.firstIndex(where: { $0.title == PStat.name}) {
-            Teams[referer]?[index].faults += PStat.faults
-            Teams[referer]?[index].matchWon += PStat.matchWon
-            Teams[referer]?[index].matchLost += PStat.matchLost
-            Teams[referer]?[index].doubleFaults += PStat.doubleFaults
-            Teams[referer]?[index].aces += PStat.aces
-                //player.wins += PStat.winners
-            Teams[referer]?[index].violations += PStat.violations
-            //matches woN, games won, points won
-            Teams[referer]?[index].pointsWon += PStat.pointsWon
-            Teams[referer]?[index].gamesWon += PStat.gamesWon
-            Teams[referer]?[index].setsWon += PStat.setVictory
+        if let index = appData.teams[referer]?.firstIndex(where: { $0.title == PStat.name}) {
+            appData.teams[referer]?[index].faults += PStat.faults
+            appData.teams[referer]?[index].matchWon += PStat.matchWon
+            appData.teams[referer]?[index].matchLost += PStat.matchLost
+            appData.teams[referer]?[index].doubleFaults += PStat.doubleFaults
+            appData.teams[referer]?[index].aces += PStat.aces
+            appData.teams[referer]?[index].violations += PStat.violations
+            appData.teams[referer]?[index].pointsWon += PStat.pointsWon
+            appData.teams[referer]?[index].gamesWon += PStat.gamesWon
+            appData.teams[referer]?[index].setsWon += PStat.setVictory
         }
     }
-   
     // Function to create a table row
     func statRow(label: String, value1: String, value2: String) -> some View {
         HStack {
@@ -822,4 +815,3 @@ extension View {
 #Preview {
     GameView()
 }
-
