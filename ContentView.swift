@@ -20,13 +20,13 @@ struct playerIcon: Identifiable, Codable, Hashable {
     var setsWon: Int = 0
 }
 
-public struct date {
+public struct date: Codable {
     var day : Int
     var month : Int
     var year : Int
 }
 
-public struct game {
+public struct game: Codable {
     var winnerIndex: Int
     var players: [String]
     var gameDate : date
@@ -100,6 +100,9 @@ struct ContentView: View {
             if let loaded = TeamDataManager.load() {
                 Teams = loaded
             }
+            if let loadedGames = GameDataManager.load() {
+                Games = loadedGames
+            }
         }
     }
     
@@ -140,6 +143,30 @@ class TeamDataManager {
         let url = getDocumentsDirectory().appendingPathComponent(fileName)
         if let data = try? Data(contentsOf: url),
            let decoded = try? JSONDecoder().decode([String: [playerIcon]].self, from: data) {
+            return decoded
+        }
+        return nil
+    }
+
+    private static func getDocumentsDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+}
+
+class GameDataManager {
+    static let fileName = "game_history.json"
+
+    static func save(_ teams: [game]) {
+        let url = getDocumentsDirectory().appendingPathComponent(fileName)
+        if let encoded = try? JSONEncoder().encode(teams) {
+            try? encoded.write(to: url)
+        }
+    }
+
+    static func load() -> [game]? {
+        let url = getDocumentsDirectory().appendingPathComponent(fileName)
+        if let data = try? Data(contentsOf: url),
+           let decoded = try? JSONDecoder().decode([game].self, from: data) {
             return decoded
         }
         return nil
