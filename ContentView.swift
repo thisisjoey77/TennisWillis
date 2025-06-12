@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import PDFKit
+import Combine
 
 struct playerIcon: Identifiable, Codable, Hashable {
     public var id: Int
@@ -41,71 +42,65 @@ enum BottomTab : String {
     case game
 }
 
-var Teams: [String: [playerIcon]] = [
-            "Varsity Team": [
-                playerIcon(id:0,title:"Joy Kim", imageUrl: "person"),
-                playerIcon(id:1,title:"Juan Lim", imageUrl: "person"),
-                playerIcon(id:2,title:"Victor Kim", imageUrl: "person"),
-                playerIcon(id:3,title:"John Park", imageUrl: "person"),
-                playerIcon(id:4,title:"Matthew Shim", imageUrl: "person"),
-                playerIcon(id:5,title:"Junho Son", imageUrl: "person"),
-                playerIcon(id:6,title:"James Kim", imageUrl: "person"),
-            ],
-            "JV Team": [
-                playerIcon(id:0,title:"Ben Willis", imageUrl: "person"),
-                playerIcon(id:1,title:"Eva Biggart", imageUrl: "person"),
-                playerIcon(id:2,title:"Chris Reese", imageUrl: "person"),
-                playerIcon(id:3,title:"Lloyd Baker", imageUrl: "person"),
-                playerIcon(id:4,title:"Darrick Broudy", imageUrl: "person"),
-                playerIcon(id:5,title:"Julie Park", imageUrl: "person"),
-                playerIcon(id:6,title:"Michael Connor", imageUrl: "person"),
-            ]
-        ]
+class AppData: ObservableObject {
+    @Published var teams: [String: [playerIcon]]
+    @Published var games: [game]
 
-var Games : [game] = []
+    init() {
+        self.teams = TeamDataManager.load() ?? [:]
+        self.games = GameDataManager.load() ?? []
+    }
+}
 
 struct ContentView: View {
+    @EnvironmentObject var appData: AppData
     @State var currentTab : BottomTab = .home
-    @State var fullScreenVisible : Bool = false
+
     var body: some View {
-        ZStack {
-            
-            //Color(red:232/255,green:225/255,blue:207/255)
+        TabView(selection: $currentTab) {
             NavigationStack {
-                ZStack {
-                    TabView(selection : $currentTab) {
-                        HomeView()
-                            .tabItem {
-                                Label( "Home", systemImage: "house")
-                            }
-                            .tag(BottomTab.home)
-                        RankView()
-                            .tabItem {
-                                Label("Ranks", systemImage:"trophy.fill")
-                            }
-                            .tag(BottomTab.ranks)
-                        GameView()
-                            .tabItem {
-                                Label("Games",systemImage:"tennisball.fill")
-                            }
-                            .tag(BottomTab.game)
-                    }
-                    .navigationTitle(currentTab.rawValue.capitalized)
+                HomeView()
+                    .environmentObject(appData)
+                    .navigationTitle("Home")
                     .navigationBarTitleDisplayMode(.large)
-                    .tint(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
-                }
             }
+            .tabItem {
+                Label("Home", systemImage: "house")
+            }
+            .tag(BottomTab.home)
+
+            NavigationStack {
+                RankView()
+                    .environmentObject(appData)
+                    .navigationTitle("Ranks")
+                    .navigationBarTitleDisplayMode(.large)
+            }
+            .tabItem {
+                Label("Ranks", systemImage: "trophy.fill")
+            }
+            .tag(BottomTab.ranks)
+
+            NavigationStack {
+                GameView()
+                    .environmentObject(appData)
+                    .navigationTitle("Games")
+                    .navigationBarTitleDisplayMode(.large)
+            }
+            .tabItem {
+                Label("Games", systemImage: "tennisball.fill")
+            }
+            .tag(BottomTab.game)
         }
+        .tint(Color(red: 2 / 255, green: 40 / 255, blue: 141 / 255))
         .onAppear {
             if let loaded = TeamDataManager.load() {
-                Teams = loaded
+                appData.teams = loaded
             }
             if let loadedGames = GameDataManager.load() {
-                Games = loadedGames
+                appData.games = loadedGames
             }
         }
     }
-    
 }
 
 struct PlayerView : View {
