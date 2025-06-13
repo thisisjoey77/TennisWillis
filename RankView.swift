@@ -258,36 +258,42 @@ struct RankView: View {
 
 struct HistoryView : View {
     @EnvironmentObject var appData: AppData
-    let roster : String;
-    
+    let roster: String
+
     var body: some View {
-        VStack(alignment: .center, spacing:0) {
-            ForEach(0..<(appData.games.count), id: \.self) { i in
-                if(appData.games[i].roster==roster) {
-                    VStack(spacing: 0) {
-                        Text("Date: " + String(appData.games[i].gameDate.year) + "/\(appData.games[i].gameDate.month)/\(appData.games[i].gameDate.day)")
-                            .frame(width: CGFloat(150 + appData.games[i].setType * 60), height: 40)
-                            .border(Color.black)
-                        HStack(spacing:0) {
-                            Text("Player")
-                                .frame(width: 150, height: 40)
-                                .border(Color.black)
-                            ForEach(1...appData.games[i].setType, id: \.self) { set in
-                                Text("Set \(set)")
-                                    .frame(width: 60, height: 40)
-                                    .bold()
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(alignment: .center, spacing: 0) {
+                    ForEach(0..<appData.games.count, id: \.self) { i in
+                        if appData.games[i].roster == roster {
+                            VStack(spacing: 0) {
+                                Text("Date: " + String(appData.games[i].gameDate.year) + "/\(appData.games[i].gameDate.month)/\(appData.games[i].gameDate.day)")
+                                    .frame(width: CGFloat(150 + appData.games[i].setType * 60), height: 40)
                                     .border(Color.black)
+                                HStack(spacing: 0) {
+                                    Text("Player")
+                                        .frame(width: 150, height: 40)
+                                        .border(Color.black)
+                                    ForEach(1...appData.games[i].setType, id: \.self) { set in
+                                        Text("Set \(set)")
+                                            .frame(width: 60, height: 40)
+                                            .bold()
+                                            .border(Color.black)
+                                    }
+                                }
+                                ForEach(0..<2, id: \.self) { j in
+                                    PastPlayerRow(
+                                        targetPlayer: appData.games[i].stats[j],
+                                        isWinner: appData.games[i].winnerIndex == j
+                                    )
+                                }
                             }
+                            .frame(width: geometry.size.width)
+                            .padding()
                         }
-                        ForEach(0..<2, id: \.self) { j in
-                            PastPlayerRow(
-                                targetPlayer: appData.games[i].stats[j],
-                                isWinner: (appData.games[i].winnerIndex==j) ? true : false
-                            )
-                        }
-                        
-                    }.padding()
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
         }
     }
