@@ -80,30 +80,42 @@ struct GameView: View {
                             .padding(.horizontal)
                         }
                         
-                        // Player 1 Selection
                         VStack(alignment: .leading) {
                             Text("Select Player 1")
                                 .font(.headline)
                             Picker("Player 1", selection: $livePlayer1) {
-                                ForEach(appData.teams[chosen] ?? [], id: \.id) { player in
-                                    Text(player.title).tag(player.title)
+                                ForEach(appData.teams[chosen] ?? []) { player in
+                                    if player.title != livePlayer2 {
+                                        Text(player.title).tag(player.title)
+                                    }
                                 }
                             }
                             .pickerStyle(MenuPickerStyle())
                             .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
                         }
-                        
-                        // Player 2 Selection
+                        .onChange(of: livePlayer1) { oldValue, newValue in
+                            if newValue == livePlayer2 {
+                                livePlayer2 = ""
+                            }
+                        }
+
                         VStack(alignment: .leading) {
                             Text("Select Player 2")
                                 .font(.headline)
                             Picker("Player 2", selection: $livePlayer2) {
-                                ForEach(appData.teams[chosen] ?? [], id: \.id) { player in
-                                    Text(player.title).tag(player.title)
+                                ForEach(appData.teams[chosen] ?? []) { player in
+                                    if player.title != livePlayer1 {
+                                        Text(player.title).tag(player.title)
+                                    }
                                 }
                             }
                             .pickerStyle(MenuPickerStyle())
                             .tint(Color(red: 2 / 255, green:40 / 255, blue: 141 / 255))
+                        }
+                        .onChange(of: livePlayer2) { oldValue, newValue in
+                            if newValue == livePlayer1 {
+                                livePlayer1 = ""
+                            }
                         }
                         
                         // Set Selection
