@@ -1,5 +1,6 @@
-#Privacy Policy - Tennix
-Last updated: June 26, 2025
+# Tennix Privacy Policy
+## By Joy Kim and Juan Lim from Korea International School Jeju
+## Last Updated: June 26, 2025
 
 This app does not collect, store, or share any personal information or user data.
 
