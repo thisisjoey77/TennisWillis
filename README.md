@@ -1,6 +1,8 @@
 # Tennix Stat Tracker App | OPEN SOURCE
 ### By Joy Kim and Juan Lim from Korea International School Jeju
 
+![SwiftUI](https://img.shields.io/badge/SwiftUI-%23FA7343?style=for-the-badge&logo=swift&logoColor=white)
+
 Welcome to the repository for Tennix, a free tennis stat tracking app usable for coaches teaching teams with any number of members.
 <br>
 Feel free to look at and run the code in XCode, but do not publish an unauthorized application replica.
